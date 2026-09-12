@@ -16,7 +16,7 @@
     "@nx/node": "23.2.1",
     "@nx/vitest": "23.2.1",
     "@nx/workspace": "23.2.1",
-    "@swc/helpers": "~0.5.18",
+    "@swc/helpers": "~0.5.23",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "~4.1.0",
     "esbuild": "^0.27.0",
@@ -32,5 +32,12 @@
   },
   "workspaces": [
     "apps/*"
-  ]
+  ],
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": "^24.0.0",
+    "pnpm": "^11.17.0",
+    "npm": "Please use pnpm instead of npm to install dependencies",
+    "yarn": "Please use pnpm instead of yarn to install dependencies"
+  }
 }
