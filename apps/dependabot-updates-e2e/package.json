@@ -1,0 +1,26 @@
+{
+  "name": "@workflow-automations/dependabot-updates-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@workflow-automations/dependabot-updates"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "dependsOn": [
+          "@workflow-automations/dependabot-updates:build",
+          "@workflow-automations/dependabot-updates:serve"
+        ],
+        "options": {
+          "jestConfig": "apps/dependabot-updates-e2e/jest.config.cts",
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}
