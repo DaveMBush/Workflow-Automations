@@ -43,3 +43,4 @@ Thumbs.db
 .claude/settings.local.json
 
 vitest.config.*.timestamp*
+apps/dependabot-updates/DependaBot.json

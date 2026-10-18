@@ -1,19 +1,8 @@
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig(() => ({
-  root: import.meta.dirname,
-  cacheDir: '../../node_modules/.vite/apps/dependabot-updates',
+export default defineConfig({
   test: {
-    name: '@workflow-automations/dependabot-updates',
-    watch: false,
-    globals: true,
+    include: ['src/**/*.spec.ts'],
     environment: 'node',
-    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    passWithNoTests: true,
-    reporters: ['default'],
-    coverage: {
-      reportsDirectory: './test-output/vitest/coverage',
-      provider: 'v8' as const,
-    },
   },
-}));
+});

@@ -1,9 +1,8 @@
 import nxEslintPlugin from '@nx/eslint-plugin';
 import smarttoolsEslintPlugin from '@smarttools/eslint-plugin';
-import smarttoolsEslintPluginRxjs from '@smarttools/eslint-plugin-rxjs';
 import typescriptEslintParser from '@typescript-eslint/parser';
 import vitest from '@vitest/eslint-plugin';
-import eslintPluginEslintComments from 'eslint-plugin-eslint-comments';
+import eslintPluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import eslintPluginImport from 'eslint-plugin-import';
 import jsdoc from 'eslint-plugin-jsdoc';
 import eslintPluginMaxParamsNoConstructor from 'eslint-plugin-max-params-no-constructor';
@@ -25,10 +24,13 @@ const eslintConfig = async () => {
     {
       ignores: [
         'dist/**',
+        '**/out-tsc/**',
         'coverage/**',
         '.nx/cache/**',
         '.nx/workspace-data/**',
         'tmp/**',
+        '**/eslint.config.*',
+        'eslint.config.*',
       ],
     },
     {
@@ -43,12 +45,10 @@ const eslintConfig = async () => {
         import: eslintPluginImport,
         'eslint-comments': eslintPluginEslintComments,
         unicorn,
-        '@smarttools/rxjs': smarttoolsEslintPluginRxjs,
         '@smarttools': smarttoolsEslintPlugin,
         'unused-imports': eslintPluginUnusedImports,
         'max-params-no-constructor': eslintPluginMaxParamsNoConstructor,
         '@stylistic': stylisticEslintPlugin,
-        playwright,
       },
     },
     {
@@ -57,7 +57,12 @@ const eslintConfig = async () => {
         parserOptions: {
           projectService: true,
           projectServiceOptions: {
-            allowDefaultProject: ['**/*.config.*', '*.config.*'],
+            allowDefaultProject: [
+              '**/*.config.*',
+              '*.config.*',
+              'apps/**/*.config.*',
+              '**/eslint.config.*',
+            ],
           },
           tsconfigRootDir: import.meta.dirname,
         },
@@ -74,10 +79,8 @@ const eslintConfig = async () => {
     {
       files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
       ignores: [
-        '**/playwright.config.ts',
         '**/test-setup.ts',
         '**/postcss.config.js',
-        '**/proxy.playwright.conf.js',
         '**/tailwind.config.js',
         '**/vitest.config.ts',
         '**/vitest.teardown.ts',
@@ -90,36 +93,6 @@ const eslintConfig = async () => {
             enforceBuildableLibDependency: true,
             allow: [],
             depConstraints: [
-              {
-                sourceTag: 'scope:e2e-common',
-                onlyDependOnLibsWithTags: [],
-              },
-              {
-                sourceTag: 'scope:smart-core',
-                onlyDependOnLibsWithTags: [],
-              },
-              {
-                sourceTag: 'scope:smart-ngrx',
-                onlyDependOnLibsWithTags: ['scope:smart-core'],
-              },
-              {
-                sourceTag: 'scope:smart-signals',
-                onlyDependOnLibsWithTags: ['scope:smart-core'],
-              },
-              {
-                sourceTag: 'scope:demo-ngrx-classic',
-                onlyDependOnLibsWithTags: [
-                  'scope:smart-ngrx',
-                  'scope:e2e-common',
-                ],
-              },
-              {
-                sourceTag: 'scope:demo-ngrx-signals',
-                onlyDependOnLibsWithTags: [
-                  'scope:smart-signals',
-                  'scope:e2e-common',
-                ],
-              },
             ],
           },
         ],
@@ -138,14 +111,11 @@ const eslintConfig = async () => {
         ...(config.rules ?? {}),
       },
     })),
-    { files: ['**/*.ts'], processor: angular.processInlineTemplates },
-    ...nxEslintPlugin.configs['flat/angular'].map((config) => ({
-      ...config,
+    {
       files: ['**/*.ts'],
-      ignores: ['**/playwright.config.ts', '**/test-setup.ts'],
+      ignores: ['**/test-setup.ts'],
       rules: {
         ...(eslintPluginSonarjs.configs['recommended-legacy'].rules ?? {}),
-        ...config.rules,
         complexity: [
           'error',
           {
@@ -161,9 +131,6 @@ const eslintConfig = async () => {
           'eslint-comments/no-restricted-disable',
           '@nx/enforce-module-boundaries',
           'no-console',
-          '@angular-eslint/template/eqeqeq',
-          '@angular-eslint/template/no-any',
-          '@angular-eslint/template/no-negated-async',
           '@typescript-eslint/explicit-function-return-type',
           '@typescript-eslint/explicit-module-boundary-types',
           '@typescript-eslint/no-unsafe-argument',
@@ -171,7 +138,6 @@ const eslintConfig = async () => {
           '@typescript-eslint/no-unsafe-call',
           '@typescript-eslint/no-unsafe-member-access',
           '@typescript-eslint/no-unsafe-return',
-          '@smarttools/rxjs/no-implicit-any-catch',
           'complexity',
           'max-depth',
           'max-lines',
@@ -266,11 +232,6 @@ const eslintConfig = async () => {
                 message: 'Please use moment-timezone instead.',
               },
               {
-                name: '@angular/compiler',
-                message:
-                  'You should never need to import anything from this package',
-              },
-              {
                 name: 'lodash',
                 message: "Please don't use any form of lodash",
               },
@@ -285,7 +246,7 @@ const eslintConfig = async () => {
           'error',
           {
             selector:
-              'NewExpression Identifier[name="Promise"], CallExpression Identifier[name="firstValueFrom"], CallExpression Identifier[name="lastValueFrom"]',
+              'CallExpression Identifier[name="firstValueFrom"], CallExpression Identifier[name="lastValueFrom"]',
             message: 'Prefer Observables over of Promises',
           },
         ],
@@ -302,47 +263,6 @@ const eslintConfig = async () => {
         'prefer-spread': 'error',
         'prefer-arrow-callback': 'off',
         radix: 'error',
-        '@angular-eslint/component-class-suffix': 'error',
-        '@angular-eslint/component-selector': [
-          'error',
-          {
-            type: 'element',
-            prefix: ['dmb', 'dmb'],
-            style: 'kebab-case',
-          },
-        ],
-        '@angular-eslint/contextual-decorator': 'error',
-        '@angular-eslint/contextual-lifecycle': 'error',
-        '@angular-eslint/directive-class-suffix': 'error',
-        '@angular-eslint/directive-selector': [
-          'error',
-          {
-            type: 'attribute',
-            prefix: ['dmb'],
-            style: 'camelCase',
-          },
-        ],
-        '@angular-eslint/no-attribute-decorator': 'error',
-        '@angular-eslint/no-empty-lifecycle-method': 'error',
-        '@angular-eslint/no-host-metadata-property': 'off',
-        '@angular-eslint/no-input-rename': 'error',
-        '@angular-eslint/no-lifecycle-call': 'error',
-        '@angular-eslint/no-output-on-prefix': 'error',
-        '@angular-eslint/no-output-rename': 'error',
-        '@angular-eslint/no-pipe-impure': 'error',
-        '@angular-eslint/no-queries-metadata-property': 'error',
-        '@angular-eslint/pipe-prefix': [
-          'error',
-          {
-            prefixes: ['dmb'],
-          },
-        ],
-        '@angular-eslint/prefer-on-push-component-change-detection': 'error',
-        '@angular-eslint/prefer-output-readonly': 'error',
-        '@angular-eslint/use-component-view-encapsulation': 'error',
-        '@angular-eslint/use-component-selector': 'error',
-        '@angular-eslint/use-lifecycle-interface': 'error',
-        '@angular-eslint/use-pipe-transform-interface': 'error',
         '@typescript-eslint/await-thenable': 'error',
         '@typescript-eslint/adjacent-overload-signatures': 'error',
         '@typescript-eslint/ban-ts-comment': 'error',
@@ -597,62 +517,8 @@ const eslintConfig = async () => {
             argsIgnorePattern: '^_',
           },
         ],
-        '@ngrx/avoid-combining-selectors': 'error',
-        '@ngrx/avoid-cyclic-effects': 'error',
-        '@ngrx/avoid-dispatching-multiple-actions-sequentially': 'off',
-        '@ngrx/avoid-duplicate-actions-in-reducer': 'error',
-        '@ngrx/avoid-mapping-selectors': 'error',
-        '@ngrx/good-action-hygiene': 'error',
-        '@ngrx/no-dispatch-in-effects': 'error',
-        '@ngrx/no-effects-in-providers': 'error',
-        '@ngrx/no-multiple-global-stores': 'error',
-        '@ngrx/no-reducer-in-key-names': 'error',
-        '@ngrx/no-store-subscription': 'error',
-        '@ngrx/no-typed-global-store': 'error',
-        '@ngrx/on-function-explicit-return-type': 'error',
-        '@ngrx/prefer-action-creator': 'error',
-        '@ngrx/prefer-action-creator-in-dispatch': 'error',
-        '@ngrx/prefer-action-creator-in-of-type': 'error',
-        '@ngrx/prefer-concat-latest-from': 'error',
-        '@ngrx/prefer-effect-callback-in-block-statement': 'off',
-        '@ngrx/prefer-inline-action-props': 'error',
-        '@ngrx/prefer-one-generic-in-create-for-feature-selector': 'error',
-        '@ngrx/prefix-selectors-with-select': 'error',
-        '@ngrx/select-style': ['error', 'method'],
-        '@ngrx/updater-explicit-return-type': 'error',
-        '@ngrx/use-consistent-global-store-name': 'error',
-        '@ngrx/use-effects-lifecycle-interface': 'error',
         '@smarttools/no-anonymous-functions': 'error',
         '@smarttools/one-exported-item-per-file': 'error',
-        '@smarttools/rxjs/no-finnish': 'error',
-        '@smarttools/rxjs/no-async-subscribe': 'error',
-        '@smarttools/rxjs/no-compat': 'error',
-        '@smarttools/rxjs/no-create': 'error',
-        '@smarttools/rxjs/no-exposed-subjects': 'error',
-        '@smarttools/rxjs/no-ignored-notifier': 'error',
-        '@smarttools/rxjs/no-ignored-replay-buffer': 'error',
-        '@smarttools/rxjs/no-ignored-takewhile-value': 'error',
-        '@smarttools/rxjs/no-implicit-any-catch': 'error',
-        '@smarttools/rxjs/no-index': 'error',
-        '@smarttools/rxjs/no-internal': 'error',
-        '@smarttools/rxjs/no-nested-subscribe': 'error',
-        '@smarttools/rxjs/no-redundant-notify': 'error',
-        '@smarttools/rxjs/no-sharereplay': [
-          'error',
-          {
-            allowConfig: true,
-          },
-        ],
-        '@smarttools/rxjs/no-subject-unsubscribe': 'error',
-        '@smarttools/rxjs/no-subject-value': 'error',
-        '@smarttools/rxjs/no-topromise': 'error',
-        '@smarttools/rxjs/no-unbound-methods': 'error',
-        '@smarttools/rxjs/no-unsafe-catch': 'error',
-        '@smarttools/rxjs/no-unsafe-first': 'error',
-        '@smarttools/rxjs/no-unsafe-subject-next': 'error',
-        '@smarttools/rxjs/no-unsafe-switchmap': 'error',
-        '@smarttools/rxjs/no-unsafe-takeuntil': 'error',
-        '@smarttools/rxjs/prefer-observer': 'error',
         'unicorn/filename-case': 'error',
         'unicorn/no-abusive-eslint-disable': 'error',
         'import/no-duplicates': ['error'],
@@ -687,7 +553,7 @@ const eslintConfig = async () => {
         'sonarjs/no-dead-store': 'off',
         'sonarjs/prefer-for-of': 'off',
       },
-    })),
+    },
     ...nxEslintPlugin.configs['flat/javascript'].map((config) => ({
       ...config,
       files: ['**/*.js', '**/*.jsx', '**/*.cjs', '**/*.mjs'],
@@ -699,7 +565,6 @@ const eslintConfig = async () => {
       files: [
         '**/test-utils/**/*.ts',
         '**/*.spec.ts',
-        '**/playwright.config.ts',
         '**/test-setup.ts',
       ],
       rules: {
@@ -720,32 +585,15 @@ const eslintConfig = async () => {
       },
     },
     {
-      // Playwright e2e suites (dms-material-e2e): relax test-inappropriate rules.
-      // E2E specs use SCREAMING_SNAKE_CASE fixture/selector constants,
-      // console.log for debugging, live TODO markers, and leading-underscore
-      // locals by convention. Renaming them would break real API field names
-      // (e.g. `last_price`) and destroy tracked TODOs, so relax here rather
-      // than across the whole repo.
-      files: ['apps/dms-material-e2e/**/*.ts'],
-      rules: {
-        '@typescript-eslint/naming-convention': 'off',
-        'no-underscore-dangle': 'off',
-        'no-console': 'off',
-        'sonarjs/todo-tag': 'off',
-        'sonarjs/no-unused-vars': 'off',
-        '@typescript-eslint/no-unsafe-argument': 'off',
-        '@typescript-eslint/no-unsafe-assignment': 'off',
-        '@typescript-eslint/no-unsafe-member-access': 'off',
-      },
-    },
-    {
       // Vitest rules — test files only
-      // These replace the Jest equivalents from SmartNgRX eslint.config.js
-      files: ['**/*.spec.ts', 'apps/dms-material-e2e/**/*.ts'],
+      files: ['**/*.spec.ts'],
       plugins: {
         vitest,
       },
       rules: {
+        // Anonymous callbacks are the idiom in tests (it/describe/expect)
+        '@smarttools/no-anonymous-functions': 'off',
+
         // Superseded by vitest/expect-expect below
         'sonarjs/assertions-in-tests': 'off',
 
