@@ -1,6 +1,5 @@
-// The resolved gate configuration, read from env by loadConfig. repoPath is the checkout to
-// validate (required); aiReviewEnabled toggles the advisory AI-review step.
+// The resolved gate configuration, built from CLI arguments by loadConfig. repoPath is the
+// checkout to validate (required).
 export interface DmsValidationConfig {
   repoPath: string;
-  aiReviewEnabled: boolean;
 }

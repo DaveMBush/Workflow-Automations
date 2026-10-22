@@ -1,17 +1,17 @@
 import { existsSync } from 'node:fs';
 import type { DmsValidationConfig } from './types/config';
+import type { ParsedArgs } from './types/parsed-args';
 
-// Reads the gate configuration from env. The repo path is required — without it there is nothing to
-// validate, so we fail fast with a clear message rather than guessing a location.
-export function loadConfig(env: NodeJS.ProcessEnv): DmsValidationConfig {
-  const repoPath = (env.DMS_REPO_PATH ?? '').trim();
+// Builds the gate configuration from parsed CLI arguments. The repo path is required — without it
+// there is nothing to validate, so we fail fast with a clear message rather than guessing a location.
+export function loadConfig(args: ParsedArgs): DmsValidationConfig {
+  const repoPath = args.repoPath.trim();
   if (!repoPath) {
-    throw new Error('DMS_REPO_PATH is required');
+    throw new Error('Usage: dms-validation <repoPath> [--steps <json>] [--ai-review] [--log-level <level>]');
   }
   if (!existsSync(repoPath)) {
-    throw new Error(`DMS_REPO_PATH does not exist: ${repoPath}`);
+    throw new Error(`Repo path does not exist: ${repoPath}`);
   }
 
-  const aiReviewEnabled = (env.DMS_AI_REVIEW ?? '').trim().toLowerCase() === 'true';
-  return { repoPath, aiReviewEnabled };
+  return { repoPath };
 }

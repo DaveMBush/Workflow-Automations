@@ -34,12 +34,12 @@ describe('parseSteps', () => {
   });
 
   it('throws on invalid JSON', () => {
-    expect(() => parseSteps('{not json')).toThrow(/DMS_VALIDATION_STEPS/);
+    expect(() => parseSteps('{not json')).toThrow(/--steps is not valid JSON/);
   });
 
   it('throws when the value is not an array of steps', () => {
-    expect(() => parseSteps(JSON.stringify({ name: 'x' }))).toThrow(/DMS_VALIDATION_STEPS/);
-    expect(() => parseSteps(JSON.stringify([]))).toThrow(/DMS_VALIDATION_STEPS/);
-    expect(() => parseSteps(JSON.stringify([{ name: 'x' }]))).toThrow(/DMS_VALIDATION_STEPS/); // missing command
+    expect(() => parseSteps(JSON.stringify({ name: 'x' }))).toThrow(/--steps must be a JSON array/);
+    expect(() => parseSteps(JSON.stringify([]))).toThrow(/--steps must contain at least one step/);
+    expect(() => parseSteps(JSON.stringify([{ name: 'x' }]))).toThrow(/missing a command/); // missing command
   });
 });
